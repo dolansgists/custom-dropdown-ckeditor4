@@ -1,107 +1,62 @@
 /**
  * @license Copyright © 2013 Stuart Sillitoe <stuart@vericode.co.uk>
+ * strInsert – A Custom Dropdown in CKEditor 4
  * This is open source, can modify it as you wish.
  *
- * Stuart Sillitoe
+ * strInsert by Stuart Sillitoe
  * stuartsillitoe.co.uk
  *
  */
-
-/**
- * List of dicts which define strings to choose from to insert into the editor.
- *
- * Each insertable string dict is defined by three possible keys:
- *    'value': The value to insert.
- *    'name': The name for the string to use in the dropdown.
- *    'label': The voice label (also used as the tooltip title) for the string.
- *
- * Only the value to insert is required to define an insertable string, the
- * value will be used as the name (and the name as the label) if other keys are
- * not provided.
- *
- * If the value key is *not* defined and the name key is, then a group header
- * with the given name will be provided in the dropdown box.  This heading is
- * not clickable and does not insert, it is for organizational purposes only.
- */
-CKEDITOR.config.strinsert_strings =	 [
-			{'name': 'Name', 'value': '*|VALUE|*'},
-			{'name': 'Group 1'},
-			{'name': 'Another name', 'value': 'totally_different', 'label': 'Good looking'},
-		];
-
-/**
- * String to use as the button label.
- */
-CKEDITOR.config.strinsert_button_label = 'Insert';
-
-/**
- * String to use as the button title.
- */
-CKEDITOR.config.strinsert_button_title = 'Insert content';
-
-/**
- * String to use as the button voice label.
- */
-CKEDITOR.config.strinsert_button_voice = 'Insert content';
-
 CKEDITOR.plugins.add('strinsert',
 {
-	requires : ['richcombo'],
-	init : function( editor )
-	{
-		var config = editor.config;
+  requires : ['richcombo'],
+  init : function( editor )
+  {
+// array of strings to choose from that'll be inserted into the editor
+    var strings = [];
+    strings.push(['(=$logo=)', 'Company logo', 'Company logo as set in Company Settings']);
+    strings.push(['(=$date=)', 'Today\'s date', 'Today\'s date (date email is sent)']);
+    strings.push(['(=$company_code=)', 'Company SAM code', 'Your company\'s SAM code']);
+    strings.push(['(=$facility_name=)', 'Location Name', 'Name of your location']);
+    strings.push(['(=$facility_phone=)', 'Location Phone #', 'Phone number of your location']);
+    strings.push(['(=$facility_website=)', 'Location Website', 'Website for your location']);
+    strings.push(['(=$facility_email=)', 'Location Email', 'Email for your location']);
+    strings.push(['(=$facility_address=)', 'Location Address', 'Location address']);
+    strings.push(['(=$online_support_phone=)', 'Online Support Phone', 'Online support phone']);
+    strings.push(['(=$online_support_email=)', 'Online Support Email', 'Online support email']);
+    strings.push(['(=$online_login=)', 'Online login link', 'Online login link']);
+    strings.push(['(=$facebook=)', 'Facebook link', 'Facebook link']);
 
-		// Gets the list of insertable strings from the settings.
-		var strings = config.strinsert_strings;
+// add the menu to the editor
+    editor.ui.addRichCombo('strinsert',
+    {
+      label: 'Template Variables',
+      title: 'Template Variables',
+      voiceLabel: 'Template Variables',
+      className: 'cke_format',
+      multiSelect:false,
+        panel:
+      {
+        css: [ editor.config.contentsCss, CKEDITOR.skin.getPath('editor') ],
+        voiceLabel: editor.lang.panelVoiceLabel
+      },
 
-		// add the menu to the editor
-		editor.ui.addRichCombo('strinsert',
-		{
-			label: 		config.strinsert_button_label,
-			title: 		config.strinsert_button_title,
-			voiceLabel: config.strinsert_button_voice,
-			toolbar: 'insert',
-			className: 	'cke_format',
-			multiSelect:false,
-			panel:
-			{
-				css: [ editor.config.contentsCss, CKEDITOR.skin.getPath('editor') ],
-				voiceLabel: editor.lang.panelVoiceLabel
-			},
+      init: function()
+      {
+        this.startGroup( "Insert Content" );
+        for (var i in strings)
+        {
+          this.add(strings[i][0], strings[i][1], strings[i][2]);
+        }
+      },
 
-			init: function()
-			{
-				var lastgroup = '';
-				for(var i=0, len=strings.length; i < len; i++)
-				{
-					string = strings[i];
-					// If there is no value, make a group header using the name.
-					if (!string.value) {
-						this.startGroup( string.name );
-					}
-					// If we have a value, we have a string insert row.
-					else {
-						// If no name provided, use the value for the name.
-						if (!string.name) {
-							string.name = string.value;
-						}
-						// If no label provided, use the name for the label.
-						if (!string.label) {
-							string.label = string.name;
-						}
-						this.add(string.value, string.name, string.label);
-					}
-				}
-			},
-
-			onClick: function( value )
-			{
-				editor.focus();
-				editor.fire( 'saveSnapshot' );
-				editor.insertHtml(value);
-				editor.fire( 'saveSnapshot' );
-			},
-
-		});
-	}
+      onClick: function( value )
+      {
+        editor.focus();
+        editor.fire( 'saveSnapshot' );
+        editor.insertHtml(value);
+        editor.fire( 'saveSnapshot' );
+      }
+    });
+  }
 });
